@@ -11,6 +11,8 @@ require 'cql/model/finder_methods'
 require 'cql/model/persistence_methods'
 require 'cql/model/query_result'
 
+require 'uuidtools'
+
 module Cql
   class Model
     extend ActiveModel::Naming
@@ -39,12 +41,15 @@ module Cql
       end
       pk_settings = self.class.pk_settings
       class_eval do
-          attr_reader self.primary_key.to_sym
-          attr_writer self.primary_key.to_sym unless pk_settings[:read_only]
+        attr_reader self.primary_key.to_sym
+        alias  :primary_value :"#{self.primary_key}"
+        unless pk_settings[:read_only] == true
+          attr_writer self.primary_key.to_sym
+          alias  :primary_value= :"#{self.primary_key}="
+        end
       end
 
       @metadata = options[:metadata]
-      @primary_value = attributes[self.class.primary_key.to_sym]
       @persisted = false
       @deleted = false
 
@@ -53,7 +58,9 @@ module Cql
         instance_variable_set(attr_name, value)
       end
 
-      class_eval {alias  :primary_value :"#{self.primary_key}"} 
+      if pk_settings[:auto_uuid] && primary_value.nil?
+        self.instance_variable_set("@#{self.primary_key}", Cql::Uuid.new(UUIDTools::UUID.random_create.to_s))
+      end
 
       self
     end
