@@ -13,7 +13,8 @@ module Cql::Model::PersistenceMethods
 
       updates << "#{key.to_s} = #{rv}" unless value.nil?
     end
-
+    
+    if updates.size < 1 then raise('Requires value assignment on at least one column') end
     updates = updates.join(', ')
 
     query = "UPDATE #{table_name} SET #{updates} WHERE #{primary_key} = #{quoted_primary_value}"
