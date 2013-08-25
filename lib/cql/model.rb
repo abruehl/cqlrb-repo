@@ -37,6 +37,11 @@ module Cql
           attr_writer config[:attribute_name] unless config[:read_only]
         end
       end
+      pk_settings = self.class.pk_settings
+      class_eval do
+          attr_reader self.primary_key.to_sym
+          attr_writer self.primary_key.to_sym unless pk_settings[:read_only]
+      end
 
       @metadata = options[:metadata]
       @primary_value = attributes[self.class.primary_key.to_sym]
@@ -47,6 +52,8 @@ module Cql
         attr_name = "@#{key.to_s}".to_sym
         instance_variable_set(attr_name, value)
       end
+
+      class_eval {alias  :primary_value :"#{self.primary_key}"} 
 
       self
     end

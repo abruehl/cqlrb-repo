@@ -18,12 +18,21 @@ module Cql::Model::SchemaMethods
       @columns ||= {}
     end
 
+    def pk_settings
+      @primary_key_settings ||= {}
+    end
+
     def consistency(consistency_value = nil)
       @consistency ||= consistency_value.nil? ? :quorum : consistency_value.to_sym
     end
 
     def primary_key(key_name = nil)
       @primary_key ||= key_name.nil? ? 'id' : key_name.to_s
+    end
+
+    def primary_key_settings(options = {})
+      @primary_key_settings ||= {}
+      options.each {|k,v| @primary_key_settings[k.to_sym] = v}
     end
 
     def column(attribute_name, options = {})
