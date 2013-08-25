@@ -52,7 +52,10 @@ module Cql
     end
 
     def quoted_primary_value
-      primary_value.is_a?(Fixnum) ? primary_value : "'#{primary_value}'"
+      rv = "'#{primary_value}'"
+      unquoted = [Fixnum, Cql::Uuid, Float, Bignum]
+      unquoted.each {|t| if primary_value.is_a?(t) then rv = primary_value  end}
+      rv
     end
 
     def persisted?

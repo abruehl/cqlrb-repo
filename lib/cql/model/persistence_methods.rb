@@ -6,8 +6,12 @@ module Cql::Model::PersistenceMethods
 
     self.class.columns.each do |key, config|
       value = instance_variable_get("@#{config[:attribute_name].to_s}".to_sym)
-      value = "'#{value}'" unless value.is_a?(Fixnum)
-      updates << "#{key.to_s} = #{value}" unless value.nil?
+
+      rv = "'#{value}'"
+      unquoted = [Fixnum, Cql::Uuid, Float, Bignum]
+      unquoted.each {|t| if value.is_a?(t) then rv = value  end}
+
+      updates << "#{key.to_s} = #{rv}" unless value.nil?
     end
 
     updates = updates.join(', ')
